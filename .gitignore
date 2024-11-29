@@ -1,0 +1,6 @@
+.vscode
+*.lib
+*.a
+*.so
+*.dll
+*.exe
