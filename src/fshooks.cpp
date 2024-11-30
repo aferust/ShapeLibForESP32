@@ -6,7 +6,12 @@ SAFile SADFOpen(const char *pszFilename, const char *pszAccess,
                 void *pvUserData)
 {
     (void)pvUserData;
-    return shp_fs->open(pszFilename, pszAccess);
+    SAFile file = shp_fs->open(pszFilename, pszAccess);
+    if (!file)
+    {
+        Serial.printf("Failed to open file for %s", pszAccess);
+    }
+    return file;
 }
 
 SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
@@ -25,9 +30,15 @@ SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
 
 SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb, SAFile &file)
 {
-    SAOffset totalBytes = size * nmemb;
-    SAOffset writtenBytes = (SAOffset)file.write((const uint8_t *)p, totalBytes);
-    return (writtenBytes / size);
+    size_t bytesWritten = file.write((const uint8_t *)p, size * nmemb);
+    if (bytesWritten == size * nmemb)
+    {
+        return nmemb;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 SAOffset SADFSeek(SAFile &file, SAOffset offset, int whence)
