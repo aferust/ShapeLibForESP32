@@ -1,12 +1,12 @@
 #include "fshooks.hpp"
 
-void *shp_fs = nullptr;
+fs::FS *shp_fs = nullptr;
 
 SAFile SADFOpen(const char *pszFilename, const char *pszAccess,
                 void *pvUserData)
 {
     (void)pvUserData;
-    return ((fs::FS *)shp_fs)->open(pszFilename, pszAccess);
+    return shp_fs->open(pszFilename, pszAccess);
 }
 
 SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
@@ -54,7 +54,7 @@ int SADFClose(SAFile &file)
 int SADRemove(const char *filename, void *pvUserData)
 {
     (void)pvUserData;
-    return (int)((fs::FS *)shp_fs)->remove(filename);
+    return (int)shp_fs->remove(filename);
 }
 
 void SADError(const char *message)

@@ -28,7 +28,7 @@
 
 void SHPsetFileSystem(fs::FS &fs)
 {
-    shp_fs = (void *)&fs;
+    shp_fs = &fs;
 }
 
 void SASetupDefaultHooks(SAHooks *psHooks)

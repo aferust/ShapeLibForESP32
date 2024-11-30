@@ -4,7 +4,7 @@
 #include "shapefil_private.hpp"
 #include "shapefil.hpp"
 
-extern void *shp_fs;
+extern fs::FS *shp_fs;
 
 SAFile SADFOpen(const char *pszFilename, const char *pszAccess,
                 void *pvUserData);
