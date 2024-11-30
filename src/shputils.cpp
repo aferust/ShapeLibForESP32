@@ -132,7 +132,7 @@ void openfiles()
     hDBF = DBFOpen(infile, "rb");
     if (hDBF == NULL)
     {
-        printf("ERROR: Unable to open the input DBF:%s\n", infile);
+        Serial.printf("ERROR: Unable to open the input DBF:%s\n", infile);
         exit(1);
     }
     /* -------------------------------------------------------------------- */
@@ -149,7 +149,7 @@ void openfiles()
             hDBFappend = DBFCreate(outfile);
             if (hDBFappend == NULL)
             {
-                printf("ERROR: Unable to open the append DBF:%s\n", outfile);
+                Serial.printf("ERROR: Unable to open the append DBF:%s\n", outfile);
                 exit(1);
             }
         }
@@ -162,7 +162,7 @@ void openfiles()
 
     if (hSHP == NULL)
     {
-        printf("ERROR: Unable to open the input shape file:%s\n", infile);
+        Serial.printf("ERROR: Unable to open the input shape file:%s\n", infile);
         exit(1);
     }
 
@@ -181,8 +181,8 @@ void openfiles()
             hSHPappend = SHPCreate(outfile, nShapeType);
             if (hSHPappend == NULL)
             {
-                printf("ERROR: Unable to open the append shape file:%s\n",
-                       outfile);
+                Serial.printf("ERROR: Unable to open the append shape file:%s\n",
+                              outfile);
                 exit(1);
             }
         }
@@ -229,8 +229,8 @@ void mergefields()
                 {
                     if (i == j)
                         pt[i] = j;
-                    printf("Warning: Duplicate field name found (%s)\n",
-                           iszTitle);
+                    Serial.printf("Warning: Duplicate field name found (%s)\n",
+                                  iszTitle);
                     /* Duplicate field name
                    (Try to guess the correct field by position) */
                 }
@@ -260,9 +260,9 @@ void mergefields()
             if (DBFAddField(hDBFappend, iszTitle, iType, iWidth, iDecimals) ==
                 -1)
             {
-                printf("Warning: DBFAddField(%s, TYPE:%d, WIDTH:%d  DEC:%d, "
-                       "ITEM#:%d of %d) failed.\n",
-                       iszTitle, iType, iWidth, iDecimals, (i + 1), (ti + 1));
+                Serial.printf("Warning: DBFAddField(%s, TYPE:%d, WIDTH:%d  DEC:%d, "
+                              "ITEM#:%d of %d) failed.\n",
+                              iszTitle, iType, iWidth, iDecimals, (i + 1), (ti + 1));
                 pt[i] = -1;
             }
         }
@@ -313,16 +313,16 @@ int strncasecmp2(char *s1, char *s2, int n)
 
 void showitems()
 {
-    printf("Available Items: (%d)", ti);
+    Serial.printf("Available Items: (%d)", ti);
     long int maxrec = DBFGetRecordCount(hDBF);
     if (maxrec > 5000 && !iall)
     {
         maxrec = 5000;
-        printf("  ** ESTIMATED RANGES (MEAN)  For more records use \"All\"");
+        Serial.printf("  ** ESTIMATED RANGES (MEAN)  For more records use \"All\"");
     }
     else
     {
-        printf("          RANGES (MEAN)");
+        Serial.printf("          RANGES (MEAN)");
     }
 
     char stmp[40] = {0};
@@ -338,7 +338,7 @@ void showitems()
         case FTDate:
             strcpy(slow, "~");
             strcpy(shigh, "\0");
-            printf("\n  String  %3d  %-16s", iWidth, iszTitle);
+            Serial.printf("\n  String  %3d  %-16s", iWidth, iszTitle);
             for (int iRecord = 0; iRecord < maxrec; iRecord++)
             {
                 strncpy(stmp, DBFReadStringAttribute(hDBF, iRecord, i), 39);
@@ -365,15 +365,15 @@ void showitems()
                 }
             }
             if (strncasecmp2(slow, shigh, 0) < 0)
-                printf("%s to %s", slow, shigh);
+                Serial.printf("%s to %s", slow, shigh);
             else if (strncasecmp2(slow, shigh, 0) == 0)
-                printf("= %s", slow);
+                Serial.printf("= %s", slow);
             else
-                printf("No Values");
+                Serial.printf("No Values");
             break;
         case FTInteger:
         {
-            printf("\n  Integer %3d  %-16s", iWidth, iszTitle);
+            Serial.printf("\n  Integer %3d  %-16s", iWidth, iszTitle);
             long int ilow = 1999999999;
             long int ihigh = -1999999999;
             long int isum = 0;
@@ -389,16 +389,16 @@ void showitems()
             }
             const double mean = isum / maxrec;
             if (ilow < ihigh)
-                printf("%ld to %ld \t(%.1f)", ilow, ihigh, mean);
+                Serial.printf("%ld to %ld \t(%.1f)", ilow, ihigh, mean);
             else if (ilow == ihigh)
-                printf("= %ld", ilow);
+                Serial.printf("= %ld", ilow);
             else
-                printf("No Values");
+                Serial.printf("No Values");
             break;
         }
         case FTDouble:
         {
-            printf("\n  Real  %3d,%d  %-16s", iWidth, iDecimals, iszTitle);
+            Serial.printf("\n  Real  %3d,%d  %-16s", iWidth, iDecimals, iszTitle);
             double dlow = 999999999999999.0;
             double dhigh = -999999999999999.0;
             double dsum = 0;
@@ -416,21 +416,21 @@ void showitems()
             sprintf(stmp, "%%.%df to %%.%df \t(%%.%df)", iDecimals,
                     iDecimals, iDecimals);
             if (dlow < dhigh)
-                printf(stmp, dlow, dhigh, mean);
+                Serial.printf(stmp, dlow, dhigh, mean);
             else if (dlow == dhigh)
             {
                 sprintf(stmp, "= %%.%df", iDecimals);
-                printf(stmp, dlow);
+                Serial.printf(stmp, dlow);
             }
             else
-                printf("No Values");
+                Serial.printf("No Values");
             break;
         }
         case FTInvalid:
             break;
         }
     }
-    printf("\n");
+    Serial.printf("\n");
 }
 
 void findselect()
@@ -445,11 +445,11 @@ void findselect()
     }
     if (iselectitem == -1)
     {
-        printf("Warning: Item not found for selection (%s)\n", selectitem);
+        Serial.printf("Warning: Item not found for selection (%s)\n", selectitem);
         iselect = false;
         iall = false;
         showitems();
-        printf("Continued... (Selecting entire file)\n");
+        Serial.printf("Continued... (Selecting entire file)\n");
     }
     /* Extract all of the select values (by field type) */
 }
@@ -628,8 +628,8 @@ int clip_boundary()
             }
         }
 
-        printf("Vertices:%d   OUT:%d   Number of Parts:%d\n",
-               psCShape->nVertices, i2, psCShape->nParts);
+        Serial.printf("Vertices:%d   OUT:%d   Number of Parts:%d\n",
+                      psCShape->nVertices, i2, psCShape->nParts);
 
         psCShape->nVertices = i2;
 
@@ -816,7 +816,7 @@ int main(int argc, char **argv)
     if (ilist || iall || argc == 2)
     {
         setext(infile, "shp");
-        printf("DESCRIBE: %s\n", infile);
+        Serial.printf("DESCRIBE: %s\n", infile);
         strcpy(outfile, "");
     }
 
@@ -871,8 +871,8 @@ int main(int argc, char **argv)
                 hSHP = SHPOpen(clipfile, "rb");
                 if (hSHP == NULL)
                 {
-                    printf("ERROR: Unable to open the clip shape file:%s\n",
-                           clipfile);
+                    Serial.printf("ERROR: Unable to open the clip shape file:%s\n",
+                                  clipfile);
                     exit(1);
                 }
                 SHPGetInfo(hSHPappend, NULL, NULL, adfBoundsMin, adfBoundsMax);
@@ -880,8 +880,8 @@ int main(int argc, char **argv)
                 cymin = adfBoundsMin[1];
                 cxmax = adfBoundsMax[0];
                 cymax = adfBoundsMax[1];
-                printf("Theme Clip Boundary: (%lf,%lf) - (%lf,%lf)\n", cxmin,
-                       cymin, cxmax, cymax);
+                Serial.printf("Theme Clip Boundary: (%lf,%lf) - (%lf,%lf)\n", cxmin,
+                              cymin, cxmax, cymax);
             }
             else
             { /*** xmin,ymin,xmax,ymax ***/
@@ -894,8 +894,8 @@ int main(int argc, char **argv)
                 if (i >= argc)
                     error();
                 sscanf(argv[i], "%lf", &cymax);
-                printf("Clip Box: (%lf,%lf) - (%lf,%lf)\n", cxmin, cymin, cxmax,
-                       cymax);
+                Serial.printf("Clip Box: (%lf,%lf) - (%lf,%lf)\n", cxmin, cymin, cxmax,
+                              cymax);
             }
             i++;
             if (i >= argc)
@@ -939,8 +939,8 @@ int main(int argc, char **argv)
                 }
                 factor = infactor / outfactor;
             }
-            printf("Output file coordinate values will be factored by %lg\n",
-                   factor);
+            Serial.printf("Output file coordinate values will be factored by %lg\n",
+                          factor);
         } /*** End FACTOR ***/
         else if (strncasecmp2(argv[i], "SHIFT", 5) == 0)
         {
@@ -953,11 +953,11 @@ int main(int argc, char **argv)
                 error();
             sscanf(argv[i], "%lf", &yshift);
             iunit = true;
-            printf("X Shift: %lg   Y Shift: %lg\n", xshift, yshift);
+            Serial.printf("X Shift: %lg   Y Shift: %lg\n", xshift, yshift);
         } /*** End SHIFT ***/
         else
         {
-            printf("ERROR: Unknown function %s\n", argv[i]);
+            Serial.printf("ERROR: Unknown function %s\n", argv[i]);
             error();
         }
     }
@@ -975,7 +975,7 @@ int main(int argc, char **argv)
         const int iRecord = DBFGetRecordCount(hDBF);
         SHPGetInfo(hSHP, NULL, NULL, adfBoundsMin, adfBoundsMax);
 
-        printf(
+        Serial.printf(
             "Input Bounds:  (%lg,%lg) - (%lg,%lg)   Entities: %d   DBF: %d\n",
             adfBoundsMin[0], adfBoundsMin[1], adfBoundsMax[0], adfBoundsMax[1],
             nEntities, iRecord);
@@ -997,7 +997,7 @@ int main(int argc, char **argv)
         if (nEntitiesAppend == 0)
             puts("New Output File\n");
         else
-            printf(
+            Serial.printf(
                 "Append Bounds: (%lg,%lg)-(%lg,%lg)   Entities: %d  DBF: %d\n",
                 adfBoundsMin[0], adfBoundsMin[1], adfBoundsMax[0],
                 adfBoundsMax[1], nEntitiesAppend, jRecord);
@@ -1108,9 +1108,9 @@ int main(int argc, char **argv)
     SHPGetInfo(hSHPappend, &nEntitiesAppend, &nShapeTypeAppend, adfBoundsMin,
                adfBoundsMax);
 
-    printf("Output Bounds: (%lg,%lg) - (%lg,%lg)   Entities: %d  DBF: %d\n\n",
-           adfBoundsMin[0], adfBoundsMin[1], adfBoundsMax[0], adfBoundsMax[1],
-           nEntitiesAppend, jRecord);
+    Serial.printf("Output Bounds: (%lg,%lg) - (%lg,%lg)   Entities: %d  DBF: %d\n\n",
+                  adfBoundsMin[0], adfBoundsMin[1], adfBoundsMax[0], adfBoundsMax[1],
+                  nEntitiesAppend, jRecord);
 
     SHPClose(hSHP);
     SHPClose(hSHPappend);

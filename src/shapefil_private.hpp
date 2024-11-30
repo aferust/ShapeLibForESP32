@@ -30,6 +30,10 @@
 #define SHPLIB_NULLPTR NULL
 #endif
 
+#ifdef SHP_BIG_ENDIAN
+#undef SHP_BIG_ENDIAN
+#endif
+
 #if !defined(SHP_BIG_ENDIAN)
 #if defined(CPL_MSB)
 #define SHP_BIG_ENDIAN 1

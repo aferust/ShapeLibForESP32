@@ -23,10 +23,11 @@ SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
     }
 }
 
-SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb,
-                   SAFile &file)
+SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb, SAFile &file)
 {
-    return (SAOffset)file.write((const uint8_t *)p, size * nmemb);
+    SAOffset totalBytes = size * nmemb;
+    SAOffset writtenBytes = (SAOffset)file.write((const uint8_t *)p, totalBytes);
+    return (writtenBytes / size);
 }
 
 SAOffset SADFSeek(SAFile &file, SAOffset offset, int whence)
