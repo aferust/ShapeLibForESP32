@@ -710,7 +710,7 @@ int SHPAPI_CALL SHPRestoreSHX(const char *pszLayer, const char *pszAccess,
         nSHPFilesize = (UINT_MAX / 2) * 2;
 
     memcpy(pszFullname + nLenWithoutExtension, ".shx", 5);
-    const char pszSHXAccess[] = "w+b";
+    const char pszSHXAccess[] = "w+";
     SAFile fpSHX =
         psHooks->FOpen(pszFullname, pszSHXAccess, psHooks->pvUserData);
     if (fpSHX == false)
@@ -985,7 +985,7 @@ SHPHandle SHPAPI_CALL SHPCreateLL(const char *pszLayer, int nShapeType,
     char *pszFullname = STATIC_CAST(char *, malloc(nLenWithoutExtension + 5));
     memcpy(pszFullname, pszLayer, nLenWithoutExtension);
     memcpy(pszFullname + nLenWithoutExtension, ".shp", 5);
-    SAFile fpSHP = psHooks->FOpen(pszFullname, "w+b", psHooks->pvUserData);
+    SAFile fpSHP = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
     if (fpSHP == false)
     {
         char szErrorMsg[200];
@@ -998,7 +998,7 @@ SHPHandle SHPAPI_CALL SHPCreateLL(const char *pszLayer, int nShapeType,
     }
 
     memcpy(pszFullname + nLenWithoutExtension, ".shx", 5);
-    SAFile fpSHX = psHooks->FOpen(pszFullname, "w+b", psHooks->pvUserData);
+    SAFile fpSHX = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
     if (fpSHX == false)
     {
         char szErrorMsg[200];
