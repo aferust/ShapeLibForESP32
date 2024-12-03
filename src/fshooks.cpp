@@ -6,12 +6,7 @@ SAFile SADFOpen(const char *pszFilename, const char *pszAccess,
                 void *pvUserData)
 {
     (void)pvUserData;
-    SAFile file = shp_fs->open(pszFilename, pszAccess);
-    if (!file)
-    {
-        Serial.printf("Failed to open file for %s", pszAccess);
-    }
-    return file;
+    return shp_fs->open(pszFilename, pszAccess);
 }
 
 SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
