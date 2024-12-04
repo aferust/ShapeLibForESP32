@@ -268,12 +268,12 @@ SHPHandle SHPAPI_CALL SHPOpenLL(const char *pszLayer, const char *pszAccess,
     if (strcmp(pszAccess, "rb+") == 0 || strcmp(pszAccess, "r+b") == 0 ||
         strcmp(pszAccess, "r+") == 0)
     {
-        pszAccess = "r+b";
+        pszAccess = "r+";
     }
     else
     {
         bLazySHXLoading = strchr(pszAccess, 'l') != SHPLIB_NULLPTR;
-        pszAccess = "rb";
+        pszAccess = "r";
     }
 
     /* -------------------------------------------------------------------- */
@@ -648,11 +648,11 @@ int SHPAPI_CALL SHPRestoreSHX(const char *pszLayer, const char *pszAccess,
     if (strcmp(pszAccess, "rb+") == 0 || strcmp(pszAccess, "r+b") == 0 ||
         strcmp(pszAccess, "r+") == 0)
     {
-        pszAccess = "r+b";
+        pszAccess = "r+";
     }
     else
     {
-        pszAccess = "rb";
+        pszAccess = "r";
     }
 
     /* -------------------------------------------------------------------- */
