@@ -7,11 +7,10 @@ SAFile *SADFOpen(const char *pszFilename, const char *pszAccess,
 {
     (void)pvUserData;
 
-    // FS::open'dan dönen File nesnesini heap üzerinde sakla
     auto file = new fs::File(shp_fs->open(pszFilename, pszAccess));
     if (!(*file))
     {
-        delete file; // Eğer açılmazsa belleği serbest bırak
+        delete file;
         return nullptr;
     }
     return file;
@@ -65,10 +64,10 @@ int SADFClose(SAFile *file)
     if (file)
     {
         file->close();
-        delete file; // Belleği serbest bırak
+        delete file;
         return 0;
     }
-    return -1; // Geçersiz dosya
+    return -1;
 }
 
 int SADRemove(const char *filename, void *pvUserData)
