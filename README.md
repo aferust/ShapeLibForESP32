@@ -6,8 +6,7 @@
 - Even though the original C sources were converted to C++ for easy interfacing with the SD library, API is still C-ish.
 
 ## Why?
-- There are so many possible scenarios. For instance, you create polygons on QGIS or ArcGIS. Assume your board is equipped with a GPS receiver. You can program your board to achieve tasks based-on the GPS position data. Do something in polygon A and do another thing in polygon B, etc. Or save shapefiles on your SD card from your GPS receiver. 
-
+- There are so many possible scenarios. For instance, you create polygons on QGIS or ArcGIS. Save your GIS layer to an SD card. Assume your board is equipped with a GPS receiver. You can program your board to achieve tasks based on the GPS position data. Do something in polygon A and do another thing in polygon B, etc., or create and store shapefiles on your SD card based on your position data from the GPS receiver. Then, open the stored shapefile on QGIS or ArcGIS for further analysis. 
 
 ## Example code 1
 The example here contains 8 polygons and two data fields in the attribute table.
@@ -30,8 +29,8 @@ void setup() {
 
   SHPsetFileSystem(SD);
 
-  SHPHandle hSHP = SHPOpen("/bolgeler/bolgeler.shp", "r");
-  DBFHandle hDBF = DBFOpen("/bolgeler/bolgeler.dbf", "r");
+  SHPHandle hSHP = SHPOpen("/regions/regions.shp", "r");
+  DBFHandle hDBF = DBFOpen("/regions/regions.dbf", "r");
   if (hSHP == NULL || hDBF == NULL) {
     Serial.println("Failed to open shapefile or DBF file!");
     return;
