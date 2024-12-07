@@ -2,16 +2,24 @@
 
 fs::FS *shp_fs = nullptr;
 
-SAFile SADFOpen(const char *pszFilename, const char *pszAccess,
-                void *pvUserData)
+SAFile *SADFOpen(const char *pszFilename, const char *pszAccess,
+                 void *pvUserData)
 {
     (void)pvUserData;
-    return shp_fs->open(pszFilename, pszAccess);
+
+    // FS::open'dan dönen File nesnesini heap üzerinde sakla
+    auto file = new fs::File(shp_fs->open(pszFilename, pszAccess));
+    if (!(*file))
+    {
+        delete file; // Eğer açılmazsa belleği serbest bırak
+        return nullptr;
+    }
+    return file;
 }
 
-SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
+SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile *file)
 {
-    SAOffset bytesRead = file.read((uint8_t *)p, size * nmemb);
+    SAOffset bytesRead = file->read((uint8_t *)p, size * nmemb);
 
     if (bytesRead == size * nmemb)
     {
@@ -23,9 +31,9 @@ SAOffset SADFRead(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
     }
 }
 
-SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb, SAFile &file)
+SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb, SAFile *file)
 {
-    size_t bytesWritten = file.write((const uint8_t *)p, size * nmemb);
+    size_t bytesWritten = file->write((const uint8_t *)p, size * nmemb);
     if (bytesWritten == size * nmemb)
     {
         return nmemb;
@@ -36,26 +44,31 @@ SAOffset SADFWrite(const void *p, SAOffset size, SAOffset nmemb, SAFile &file)
     }
 }
 
-SAOffset SADFSeek(SAFile &file, SAOffset offset, int whence)
+SAOffset SADFSeek(SAFile *file, SAOffset offset, int whence)
 {
-    return file.seek(offset, (fs::SeekMode)whence) ? 0 : -1;
+    return file->seek(offset, (fs::SeekMode)whence) ? 0 : -1;
 }
 
-SAOffset SADFTell(SAFile &file)
+SAOffset SADFTell(SAFile *file)
 {
-    return file.position();
+    return file->position();
 }
 
-int SADFFlush(SAFile &file)
+int SADFFlush(SAFile *file)
 {
-    file.flush();
+    file->flush();
     return 0;
 }
 
-int SADFClose(SAFile &file)
+int SADFClose(SAFile *file)
 {
-    file.close();
-    return 0;
+    if (file)
+    {
+        file->close();
+        delete file; // Belleği serbest bırak
+        return 0;
+    }
+    return -1; // Geçersiz dosya
 }
 
 int SADRemove(const char *filename, void *pvUserData)
@@ -66,5 +79,5 @@ int SADRemove(const char *filename, void *pvUserData)
 
 void SADError(const char *message)
 {
-    Serial.println(message);
+    ESP_LOGE(SHP_LOG_TAG, "%s\n", message);
 }

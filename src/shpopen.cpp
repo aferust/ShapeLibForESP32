@@ -61,7 +61,7 @@
 
 void SHPAPI_CALL SHPWriteHeader(SHPHandle psSHP)
 {
-    if (psSHP->fpSHX == false)
+    if (*psSHP->fpSHX == false)
     {
         psSHP->sHooks.Error("SHPWriteHeader failed : SHX file is closed");
         return;
@@ -294,14 +294,14 @@ SHPHandle SHPAPI_CALL SHPOpenLL(const char *pszLayer, const char *pszAccess,
     memcpy(pszFullname + nLenWithoutExtension, ".shp", 5);
     psSHP->fpSHP =
         psSHP->sHooks.FOpen(pszFullname, pszAccess, psSHP->sHooks.pvUserData);
-    if (psSHP->fpSHP == false)
+    if (*psSHP->fpSHP == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".SHP", 5);
         psSHP->fpSHP = psSHP->sHooks.FOpen(pszFullname, pszAccess,
                                            psSHP->sHooks.pvUserData);
     }
 
-    if (psSHP->fpSHP == false)
+    if (*psSHP->fpSHP == false)
     {
         const size_t nMessageLen = strlen(pszFullname) * 2 + 256;
         char *pszMessage = STATIC_CAST(char *, malloc(nMessageLen));
@@ -321,14 +321,14 @@ SHPHandle SHPAPI_CALL SHPOpenLL(const char *pszLayer, const char *pszAccess,
     memcpy(pszFullname + nLenWithoutExtension, ".shx", 5);
     psSHP->fpSHX =
         psSHP->sHooks.FOpen(pszFullname, pszAccess, psSHP->sHooks.pvUserData);
-    if (psSHP->fpSHX == false)
+    if (*psSHP->fpSHX == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".SHX", 5);
         psSHP->fpSHX = psSHP->sHooks.FOpen(pszFullname, pszAccess,
                                            psSHP->sHooks.pvUserData);
     }
 
-    if (psSHP->fpSHX == false)
+    if (*psSHP->fpSHX == false)
     {
         const size_t nMessageLen =
             64 + strlen(pszFullname) * 2 + strlen(SHP_RESTORE_SHX_HINT_MESSAGE);
@@ -663,14 +663,14 @@ int SHPAPI_CALL SHPRestoreSHX(const char *pszLayer, const char *pszAccess,
     char *pszFullname = STATIC_CAST(char *, malloc(nLenWithoutExtension + 5));
     memcpy(pszFullname, pszLayer, nLenWithoutExtension);
     memcpy(pszFullname + nLenWithoutExtension, ".shp", 5);
-    SAFile fpSHP = psHooks->FOpen(pszFullname, pszAccess, psHooks->pvUserData);
-    if (fpSHP == false)
+    SAFile *fpSHP = psHooks->FOpen(pszFullname, pszAccess, psHooks->pvUserData);
+    if (*fpSHP == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".SHP", 5);
         fpSHP = psHooks->FOpen(pszFullname, pszAccess, psHooks->pvUserData);
     }
 
-    if (fpSHP == false)
+    if (*fpSHP == false)
     {
         const size_t nMessageLen = strlen(pszFullname) * 2 + 256;
         char *pszMessage = STATIC_CAST(char *, malloc(nMessageLen));
@@ -711,9 +711,9 @@ int SHPAPI_CALL SHPRestoreSHX(const char *pszLayer, const char *pszAccess,
 
     memcpy(pszFullname + nLenWithoutExtension, ".shx", 5);
     const char pszSHXAccess[] = "w+";
-    SAFile fpSHX =
+    SAFile *fpSHX =
         psHooks->FOpen(pszFullname, pszSHXAccess, psHooks->pvUserData);
-    if (fpSHX == false)
+    if (*fpSHX == false)
     {
         size_t nMessageLen = strlen(pszFullname) * 2 + 256;
         char *pszMessage = STATIC_CAST(char *, malloc(nMessageLen));
@@ -880,7 +880,7 @@ void SHPAPI_CALL SHPClose(SHPHandle psSHP)
     free(psSHP->panRecOffset);
     free(psSHP->panRecSize);
 
-    if (psSHP->fpSHX != false)
+    if (*psSHP->fpSHX != false)
         psSHP->sHooks.FClose(psSHP->fpSHX);
     psSHP->sHooks.FClose(psSHP->fpSHP);
 
@@ -985,8 +985,8 @@ SHPHandle SHPAPI_CALL SHPCreateLL(const char *pszLayer, int nShapeType,
     char *pszFullname = STATIC_CAST(char *, malloc(nLenWithoutExtension + 5));
     memcpy(pszFullname, pszLayer, nLenWithoutExtension);
     memcpy(pszFullname + nLenWithoutExtension, ".shp", 5);
-    SAFile fpSHP = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
-    if (fpSHP == false)
+    SAFile *fpSHP = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
+    if (*fpSHP == false)
     {
         char szErrorMsg[200];
         snprintf(szErrorMsg, sizeof(szErrorMsg), "Failed to create file %s: %s",
@@ -998,8 +998,8 @@ SHPHandle SHPAPI_CALL SHPCreateLL(const char *pszLayer, int nShapeType,
     }
 
     memcpy(pszFullname + nLenWithoutExtension, ".shx", 5);
-    SAFile fpSHX = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
-    if (fpSHX == false)
+    SAFile *fpSHX = psHooks->FOpen(pszFullname, "w+", psHooks->pvUserData);
+    if (*fpSHX == false)
     {
         char szErrorMsg[200];
         snprintf(szErrorMsg, sizeof(szErrorMsg), "Failed to create file %s: %s",
@@ -1899,7 +1899,7 @@ SHPObject SHPAPI_CALL1(*) SHPReadObject(const SHPHandle psSHP, int hEntity)
     /* -------------------------------------------------------------------- */
     /*      Read offset/length from SHX loading if necessary.               */
     /* -------------------------------------------------------------------- */
-    if (psSHP->panRecOffset[hEntity] == 0 && psSHP->fpSHX != false)
+    if (psSHP->panRecOffset[hEntity] == 0 && *psSHP->fpSHX != false)
     {
         unsigned int nOffset;
         unsigned int nLength;

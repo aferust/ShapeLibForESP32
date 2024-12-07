@@ -18,6 +18,8 @@
 
 #include <Arduino.h>
 
+static const char *SHP_LOG_TAG = "ShapeLib";
+
 #ifdef __cplusplus
 #define STATIC_CAST(type, x) static_cast<type>(x)
 #define REINTERPRET_CAST(type, x) reinterpret_cast<type>(x)

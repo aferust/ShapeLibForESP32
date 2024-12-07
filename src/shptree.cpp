@@ -665,7 +665,7 @@ void SHPAPI_CALL SHPTreeTrimExtraNodes(SHPTree *hTree)
 struct SHPDiskTreeInfo
 {
     SAHooks sHooks;
-    SAFile fpQIX;
+    SAFile *fpQIX;
 };
 
 /************************************************************************/
@@ -685,9 +685,9 @@ SHPTreeDiskHandle SHPOpenDiskTree(const char *pszQIXFilename,
     else
         memcpy(&(hDiskTree->sHooks), psHooks, sizeof(SAHooks));
 
-    hDiskTree->fpQIX = hDiskTree->sHooks.FOpen(pszQIXFilename, "rb",
+    hDiskTree->fpQIX = hDiskTree->sHooks.FOpen(pszQIXFilename, "r",
                                                hDiskTree->sHooks.pvUserData);
-    if (hDiskTree->fpQIX == false)
+    if (*hDiskTree->fpQIX == false)
     {
         free(hDiskTree);
         return SHPLIB_NULLPTR;
@@ -861,15 +861,12 @@ static bool SHPSearchDiskTreeNode(const SHPTreeDiskHandle hDiskTree,
 /*                          SHPTreeReadLibc()                           */
 /************************************************************************/
 
-static SAOffset SHPTreeReadLibc(void *p, SAOffset size, SAOffset nmemb, SAFile &file)
+static SAOffset SHPTreeReadLibc(void *p, SAOffset size, SAOffset nmemb, SAFile *file)
 {
-    // Toplam okunacak bayt miktarını hesaplayın
     SAOffset totalBytes = size * nmemb;
 
-    // File sınıfından okuma yapın
-    SAOffset bytesRead = file.read((uint8_t *)p, (size_t)totalBytes);
+    SAOffset bytesRead = file->read((uint8_t *)p, (size_t)totalBytes);
 
-    // Okunan bayt sayısını geri döndürün
     return bytesRead / size; // Okunan "nmemb" sayısını döndürmek için bölüyoruz
 }
 
@@ -877,30 +874,30 @@ static SAOffset SHPTreeReadLibc(void *p, SAOffset size, SAOffset nmemb, SAFile &
 /*                          SHPTreeSeekLibc()                           */
 /************************************************************************/
 
-static SAOffset SHPTreeSeekLibc(SAFile &file, SAOffset offset, int whence)
+static SAOffset SHPTreeSeekLibc(SAFile *file, SAOffset offset, int whence)
 {
     switch (whence)
     {
     case SEEK_SET:
-        file.seek((uint32_t)offset); // Belirtilen pozisyona git
+        file->seek((uint32_t)offset); // Belirtilen pozisyona git
         break;
     case SEEK_CUR:
-        file.seek((uint32_t)(file.position() + offset)); // Mevcut pozisyona göre ilerle
+        file->seek((uint32_t)(file->position() + offset)); // Mevcut pozisyona göre ilerle
         break;
     case SEEK_END:
-        file.seek((uint32_t)(file.size() + offset)); // Dosya sonuna göre git
+        file->seek((uint32_t)(file->size() + offset)); // Dosya sonuna göre git
         break;
     default:;
     }
 
-    return file.position(); // Yeni dosya pozisyonunu döndür
+    return file->position(); // Yeni dosya pozisyonunu döndür
 }
 
 /************************************************************************/
 /*                         SHPSearchDiskTree()                          */
 /************************************************************************/
 
-int SHPAPI_CALL1(*) SHPSearchDiskTree(SAFile &file, double *padfBoundsMin, double *padfBoundsMax, int *pnShapeCount)
+int SHPAPI_CALL1(*) SHPSearchDiskTree(SAFile *file, double *padfBoundsMin, double *padfBoundsMax, int *pnShapeCount)
 {
     struct SHPDiskTreeInfo sDiskTree;
     memset(&sDiskTree.sHooks, 0, sizeof(sDiskTree.sHooks));
@@ -1000,7 +997,7 @@ static int SHPGetSubNodeOffset(SHPTreeNode *node)
 /*                          SHPWriteTreeNode()                          */
 /************************************************************************/
 
-static void SHPWriteTreeNode(SAFile &file, SHPTreeNode *node, const SAHooks *psHooks)
+static void SHPWriteTreeNode(SAFile *file, SHPTreeNode *node, const SAHooks *psHooks)
 {
     int i, j;
     int offset = SHPGetSubNodeOffset(node);
@@ -1008,7 +1005,7 @@ static void SHPWriteTreeNode(SAFile &file, SHPTreeNode *node, const SAHooks *psH
 
     if (pabyRec == SHPLIB_NULLPTR)
     {
-        Serial.println("Memory allocation failure");
+        ESP_LOGE(SHP_LOG_TAG, "Memory allocation failure\n");
         return;
     }
 
@@ -1056,7 +1053,7 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, const SAHooks *psHooks)
 {
     const char signature[4] = "SQT";
     unsigned char abyBuf[32];
-    SAFile file;
+    SAFile *file;
 
     if (psHooks == SHPLIB_NULLPTR)
     {
@@ -1065,14 +1062,12 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, const SAHooks *psHooks)
         psHooks = &sHooks;
     }
 
-    // Dosya açma
-    file = psHooks->FOpen(filename, "wb", psHooks->pvUserData);
-    if (file == false)
+    file = psHooks->FOpen(filename, "w", psHooks->pvUserData);
+    if (*file == false)
     {
         return FALSE;
     }
 
-    // Başlık yazma
     memcpy(abyBuf, signature, 3);
 
 #if defined(SHP_BIG_ENDIAN)
@@ -1089,7 +1084,6 @@ int SHPWriteTreeLL(SHPTree *tree, const char *filename, const SAHooks *psHooks)
     psHooks->FWrite(&(tree->nTotalCount), 4, 1, file);
     psHooks->FWrite(&(tree->nMaxDepth), 4, 1, file);
 
-    // Düğümleri yaz
     SHPWriteTreeNode(file, tree->psRoot, psHooks);
 
     psHooks->FClose(file);

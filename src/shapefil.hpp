@@ -144,15 +144,15 @@ extern "C"
 
     typedef struct
     {
-        SAFile (*FOpen)(const char *filename, const char *access,
-                        void *pvUserData);
-        SAOffset (*FRead)(void *p, SAOffset size, SAOffset nmemb, SAFile &file);
+        SAFile *(*FOpen)(const char *filename, const char *access,
+                         void *pvUserData);
+        SAOffset (*FRead)(void *p, SAOffset size, SAOffset nmemb, SAFile *file);
         SAOffset (*FWrite)(const void *p, SAOffset size, SAOffset nmemb,
-                           SAFile &file);
-        SAOffset (*FSeek)(SAFile &file, SAOffset offset, int whence);
-        SAOffset (*FTell)(SAFile &file);
-        int (*FFlush)(SAFile &file);
-        int (*FClose)(SAFile &file);
+                           SAFile *file);
+        SAOffset (*FSeek)(SAFile *file, SAOffset offset, int whence);
+        SAOffset (*FTell)(SAFile *file);
+        int (*FFlush)(SAFile *file);
+        int (*FClose)(SAFile *file);
         int (*Remove)(const char *filename, void *pvUserData);
 
         void (*Error)(const char *message);
@@ -174,8 +174,8 @@ extern "C"
     {
         SAHooks sHooks;
 
-        SAFile fpSHP;
-        SAFile fpSHX;
+        SAFile *fpSHP;
+        SAFile *fpSHX;
 
         int nShapeType; /* SHPT_* */
 
@@ -432,7 +432,7 @@ extern "C"
     {
         SAHooks sHooks;
 
-        SAFile fp;
+        SAFile *fp;
 
         int nRecords;
 

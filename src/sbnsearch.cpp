@@ -63,7 +63,7 @@ typedef struct
 struct SBNSearchInfo
 {
     SAHooks sHooks;
-    SAFile fpSBN;
+    SAFile *fpSBN;
     SBNNodeDescriptor *pasNodeDescriptor;
     int nShapeCount; /* Total number of shapes */
     int nMaxDepth;   /* Tree depth */
@@ -134,8 +134,8 @@ SBNSearchHandle SBNOpenDiskTree(const char *pszSBNFilename,
         memcpy(&(hSBN->sHooks), psHooks, sizeof(SAHooks));
 
     hSBN->fpSBN =
-        hSBN->sHooks.FOpen(pszSBNFilename, "rb", hSBN->sHooks.pvUserData);
-    if (hSBN->fpSBN == false)
+        hSBN->sHooks.FOpen(pszSBNFilename, "r", hSBN->sHooks.pvUserData);
+    if (*hSBN->fpSBN == false)
     {
         free(hSBN);
         return SHPLIB_NULLPTR;

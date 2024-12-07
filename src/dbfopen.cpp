@@ -342,10 +342,10 @@ DBFHandle SHPAPI_CALL DBFOpenLL(const char *pszFilename, const char *pszAccess,
         return SHPLIB_NULLPTR;
 
     if (strcmp(pszAccess, "r") == 0)
-        pszAccess = "rb";
+        pszAccess = "r";
 
     if (strcmp(pszAccess, "r+") == 0)
-        pszAccess = "rb+";
+        pszAccess = "r+";
 
     /* -------------------------------------------------------------------- */
     /*      Compute the base (layer) name.  If there is any extension       */
@@ -360,7 +360,7 @@ DBFHandle SHPAPI_CALL DBFOpenLL(const char *pszFilename, const char *pszAccess,
     psDBF->fp = psHooks->FOpen(pszFullname, pszAccess, psHooks->pvUserData);
     memcpy(&(psDBF->sHooks), psHooks, sizeof(SAHooks));
 
-    if (psDBF->fp == false)
+    if (*psDBF->fp == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".DBF", 5);
         psDBF->fp =
@@ -368,8 +368,8 @@ DBFHandle SHPAPI_CALL DBFOpenLL(const char *pszFilename, const char *pszAccess,
     }
 
     memcpy(pszFullname + nLenWithoutExtension, ".cpg", 5);
-    SAFile pfCPG = psHooks->FOpen(pszFullname, "r", psHooks->pvUserData);
-    if (pfCPG == false)
+    SAFile *pfCPG = psHooks->FOpen(pszFullname, "r", psHooks->pvUserData);
+    if (pfCPG)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".CPG", 5);
         pfCPG = psHooks->FOpen(pszFullname, "r", psHooks->pvUserData);
@@ -377,7 +377,7 @@ DBFHandle SHPAPI_CALL DBFOpenLL(const char *pszFilename, const char *pszAccess,
 
     free(pszFullname);
 
-    if (psDBF->fp == false)
+    if (*psDBF->fp == false)
     {
         free(psDBF);
         if (pfCPG)
@@ -631,8 +631,8 @@ DBFHandle SHPAPI_CALL DBFCreateLL(const char *pszFilename,
     /* -------------------------------------------------------------------- */
     /*      Create the file.                                                */
     /* -------------------------------------------------------------------- */
-    SAFile fp = psHooks->FOpen(pszFullname, "wb+", psHooks->pvUserData);
-    if (fp == false)
+    SAFile *fp = psHooks->FOpen(pszFullname, "wb+", psHooks->pvUserData);
+    if (*fp == false)
     {
         free(pszFullname);
         return SHPLIB_NULLPTR;
@@ -651,7 +651,7 @@ DBFHandle SHPAPI_CALL DBFCreateLL(const char *pszFilename,
         }
         if (ldid < 0)
         {
-            SAFile fpCPG =
+            SAFile *fpCPG =
                 psHooks->FOpen(pszFullname, "w", psHooks->pvUserData);
             psHooks->FWrite(
                 CONST_CAST(void *, STATIC_CAST(const void *, pszCodePage)),
