@@ -6,10 +6,11 @@ SAFile *SADFOpen(const char *pszFilename, const char *pszAccess,
                  void *pvUserData)
 {
     (void)pvUserData;
-	
-	if(!shp_fs->exists(pszFilename)){
-		return nullptr;
-	}
+
+    /*if (strcmp(pszAccess, "w+") == 0 && !shp_fs->exists(pszFilename)) // need this?
+    {
+        return nullptr;
+    }*/
 
     auto file = new fs::File(shp_fs->open(pszFilename, pszAccess));
     if (!(*file))
