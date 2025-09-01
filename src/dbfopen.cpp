@@ -360,6 +360,13 @@ DBFHandle SHPAPI_CALL DBFOpenLL(const char *pszFilename, const char *pszAccess,
     psDBF->fp = psHooks->FOpen(pszFullname, pszAccess, psHooks->pvUserData);
     memcpy(&(psDBF->sHooks), psHooks, sizeof(SAHooks));
 
+    if (!psDBF->fp)
+    {
+        free(psDBF);
+        free(pszFullname);
+        return SHPLIB_NULLPTR;
+    }
+
     if (*psDBF->fp == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".DBF", 5);

@@ -294,6 +294,24 @@ SHPHandle SHPAPI_CALL SHPOpenLL(const char *pszLayer, const char *pszAccess,
     memcpy(pszFullname + nLenWithoutExtension, ".shp", 5);
     psSHP->fpSHP =
         psSHP->sHooks.FOpen(pszFullname, pszAccess, psSHP->sHooks.pvUserData);
+
+    if (!psSHP->fpSHP)
+    {
+        const size_t nMessageLen = strlen(pszFullname) * 2 + 256;
+        char *pszMessage = STATIC_CAST(char *, malloc(nMessageLen));
+        pszFullname[nLenWithoutExtension] = 0;
+        snprintf(pszMessage, nMessageLen,
+                 "Unable to open %s.shp or %s.SHP in %s mode.", pszFullname,
+                 pszFullname, pszAccess);
+        psHooks->Error(pszMessage);
+        free(pszMessage);
+
+        free(psSHP);
+        free(pszFullname);
+
+        return SHPLIB_NULLPTR;
+    }
+
     if (*psSHP->fpSHP == false)
     {
         memcpy(pszFullname + nLenWithoutExtension, ".SHP", 5);
